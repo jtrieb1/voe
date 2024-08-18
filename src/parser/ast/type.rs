@@ -45,7 +45,17 @@ impl Type {
     }
 
     pub fn is_integral(&self) -> bool {
-        matches!(self, Type::U8 | Type::U16 | Type::U32 | Type::U64 | Type::I8 | Type::I16 | Type::I32 | Type::I64)
+        matches!(
+            self,
+            Type::U8
+                | Type::U16
+                | Type::U32
+                | Type::U64
+                | Type::I8
+                | Type::I16
+                | Type::I32
+                | Type::I64
+        )
     }
 
     pub fn is_decimal(&self) -> bool {
@@ -76,7 +86,6 @@ impl Type {
             (Type::U64, Type::U16) => Some(Type::U64),
             (Type::U64, Type::U32) => Some(Type::U64),
             (Type::U64, rhs) => Some(rhs.clone()),
-
 
             // Signed pairings, take larger type as result
             (Type::I8, rhs) => Some(rhs.clone()),

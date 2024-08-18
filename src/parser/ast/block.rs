@@ -1,5 +1,5 @@
-use super::Statement;
 use super::statement::parse_statement;
+use super::Statement;
 use crate::parser::Rule;
 use pest::error::{Error, ErrorVariant};
 use pest::iterators::Pairs;

@@ -23,6 +23,18 @@ pub enum Operator {
 }
 
 impl Operator {
+    pub fn is_comparison(&self) -> bool {
+        matches!(
+            self,
+            Operator::Equal
+                | Operator::NotEqual
+                | Operator::LessThan
+                | Operator::LessThanOrEqual
+                | Operator::GreaterThan
+                | Operator::GreaterThanOrEqual
+        )
+    }
+
     pub fn return_type(&self, ctx_rhs: &Atom, ctx_lhs: &Atom) -> Option<Type> {
         match self {
             Operator::Equal

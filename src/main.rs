@@ -68,7 +68,6 @@ fn main() -> Result<(), ()> {
         println!("After AST passes:\n\n{}\n", file);
     }
 
-
     fs::write(args.output, format!("{}", file)).map_err(|err| {
         println!("{}", err);
     })?;

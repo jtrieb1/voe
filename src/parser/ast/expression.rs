@@ -1,17 +1,31 @@
+use super::{
+    atom::{parse_atom, Atom, AtomValue},
+    Operator, Type,
+};
+use crate::parser::Rule;
+use once_cell::sync::Lazy;
 use pest::error::Error;
 use pest::iterators::Pair;
-use once_cell::sync::Lazy;
-use super::{atom::{AtomValue, parse_atom, Atom}, Operator};
-use crate::parser::Rule;
 
 use pest::pratt_parser::{Assoc::*, Op, PrattParser};
 
 pub static EXPRESSION_PARSER: Lazy<PrattParser<Rule>> = Lazy::new(|| {
     PrattParser::new()
-        .op(Op::infix(Rule::bitwise_and, Left) | Op::infix(Rule::bitwise_or, Left) | Op::infix(Rule::logical_and, Left) | Op::infix(Rule::logical_or, Left))
-        .op(Op::infix(Rule::eq, Left) | Op::infix(Rule::ne, Left) | Op::infix(Rule::lt, Left) | Op::infix(Rule::le, Left) | Op::infix(Rule::gt, Left) | Op::infix(Rule::ge, Left))
+        .op(Op::infix(Rule::bitwise_and, Left)
+            | Op::infix(Rule::bitwise_or, Left)
+            | Op::infix(Rule::logical_and, Left)
+            | Op::infix(Rule::logical_or, Left))
+        .op(Op::infix(Rule::eq, Left)
+            | Op::infix(Rule::ne, Left)
+            | Op::infix(Rule::lt, Left)
+            | Op::infix(Rule::le, Left)
+            | Op::infix(Rule::gt, Left)
+            | Op::infix(Rule::ge, Left))
         .op(Op::infix(Rule::add, Left) | Op::infix(Rule::sub, Left))
-        .op(Op::infix(Rule::mul, Left) | Op::infix(Rule::div, Left) | Op::infix(Rule::r#mod, Left) | Op::infix(Rule::pow, Right))
+        .op(Op::infix(Rule::mul, Left)
+            | Op::infix(Rule::div, Left)
+            | Op::infix(Rule::r#mod, Left)
+            | Op::infix(Rule::pow, Right))
         .op(Op::prefix(Rule::unary_minus) | Op::prefix(Rule::not))
 });
 
@@ -28,6 +42,23 @@ impl Expression {
 
     pub fn atom(atom: Atom) -> Expression {
         Expression::Atom(atom)
+    }
+
+    pub fn return_type(&self) -> Option<Type> {
+        match self {
+            Expression::BinaryOperation(lhs, op, rhs) => {
+                if op.is_comparison() {
+                    return Some(Type::Bool);
+                }
+                let lhs_ty = lhs.return_type();
+                let rhs_ty = rhs.return_type();
+                match (lhs_ty, rhs_ty) {
+                    (Some(lhs_ty), Some(rhs_ty)) => lhs_ty.join(&rhs_ty),
+                    _ => None,
+                }
+            }
+            Expression::Atom(atom) => atom.ty.clone(),
+        }
     }
 }
 
@@ -55,13 +86,15 @@ pub fn parse_expression(pair: Pair<Rule>) -> Result<Expression, Error<Rule>> {
             Rule::unary_minus => {
                 let expr = t?;
                 match expr {
-                    Expression::Atom(atom) => {
-                        Ok(Expression::Atom(Atom::new(!atom.negative, atom.value, atom.ty)))
-                    }
+                    Expression::Atom(atom) => Ok(Expression::Atom(Atom::new(
+                        !atom.negative,
+                        atom.value,
+                        atom.ty,
+                    ))),
                     Expression::BinaryOperation(..) => Ok(Expression::Atom(Atom::new(
                         true,
                         AtomValue::ParExpr(Box::new(expr)),
-                        None
+                        None,
                     ))),
                 }
             }

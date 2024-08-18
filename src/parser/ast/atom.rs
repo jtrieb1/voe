@@ -13,7 +13,11 @@ pub struct Atom {
 
 impl Atom {
     pub fn new(negative: bool, value: AtomValue, ty: Option<Type>) -> Atom {
-        Atom { negative, value, ty }
+        Atom {
+            negative,
+            value,
+            ty,
+        }
     }
     pub fn get_type(&self) -> Option<Type> {
         self.ty.clone()
@@ -72,17 +76,13 @@ pub enum AtomValue {
 
 fn parse_integer(pair: Pair<Rule>) -> Result<AtomValue, Error<Rule>> {
     let repr = pair.as_str();
-    let var: i128 = repr
-        .parse()
-        .unwrap();
+    let var: i128 = repr.parse().unwrap();
     Ok(AtomValue::Integer(var))
 }
 
 fn parse_float(pair: Pair<Rule>) -> Result<AtomValue, Error<Rule>> {
     let repr = pair.as_str();
-    let var: f64 = repr
-        .parse()
-        .unwrap();
+    let var: f64 = repr.parse().unwrap();
     Ok(AtomValue::Float(var))
 }
 
@@ -126,5 +126,9 @@ pub fn parse_atom(pair: Pair<Rule>) -> Result<Atom, Error<Rule>> {
             next.as_span(),
         ))?,
     };
-    Ok(Atom { negative, value, ty})
+    Ok(Atom {
+        negative,
+        value,
+        ty,
+    })
 }

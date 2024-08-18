@@ -8,7 +8,11 @@ pub struct VariableDeclaration {
 }
 
 impl VariableDeclaration {
-    pub fn new(name: String, var_type: Option<Type>, value: Option<Expression>) -> VariableDeclaration {
+    pub fn new(
+        name: String,
+        var_type: Option<Type>,
+        value: Option<Expression>,
+    ) -> VariableDeclaration {
         VariableDeclaration {
             name,
             var_type,

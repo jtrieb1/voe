@@ -82,7 +82,9 @@ pub fn parse_statement(pair: Pair<Rule>) -> Result<Statement, Error<Rule>> {
                 match pair.as_rule() {
                     Rule::expression => {
                         return Ok(Statement::VariableDeclaration(VariableDeclaration::new(
-                            name, None, Some(parse_expression(pair)?),
+                            name,
+                            None,
+                            Some(parse_expression(pair)?),
                         )));
                     }
                     _ => ty = Some(parse_type(pair)?),
