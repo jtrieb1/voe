@@ -18,6 +18,7 @@ impl ConstantFolding {
             Statement::Conditional(cond) => self.fold_conditional(cond),
         }
     }
+
     pub fn fold_function_definition(&self, fd: FunctionDefinition) -> Statement {
         let FunctionDefinition {
             name,
@@ -102,21 +103,20 @@ impl ConstantFolding {
 
                     match op {
                         Operator::Add => {
-                            Expression::Atom(Atom::from_i28(lhs_val + rhs_val, lty.join(&rty)))
+                            Expression::Atom(Atom::from_i28(lhs_val + rhs_val, lty.join(rty)))
                         }
                         Operator::Subtract => {
-                            Expression::Atom(Atom::from_i28(lhs_val - rhs_val, lty.join(&rty)))
+                            Expression::Atom(Atom::from_i28(lhs_val - rhs_val, lty.join(rty)))
                         }
                         Operator::Multiply => {
-                            Expression::Atom(Atom::from_i28(lhs_val * rhs_val, lty.join(&rty)))
+                            Expression::Atom(Atom::from_i28(lhs_val * rhs_val, lty.join(rty)))
                         }
                         Operator::Divide => {
-                            Expression::Atom(Atom::from_i28(lhs_val / rhs_val, lty.join(&rty)))
+                            Expression::Atom(Atom::from_i28(lhs_val / rhs_val, lty.join(rty)))
                         }
                         Operator::Modulo => {
-                            Expression::Atom(Atom::from_i28(lhs_val % rhs_val, lty.join(&rty)))
+                            Expression::Atom(Atom::from_i28(lhs_val % rhs_val, lty.join(rty)))
                         }
-
                         _ => Expression::BinaryOperation(
                             Box::new(Expression::Atom(lhs)),
                             op,
@@ -156,21 +156,20 @@ impl ConstantFolding {
 
                     match op {
                         Operator::Add => {
-                            Expression::Atom(Atom::from_f64(lhs_val + rhs_val, lty.join(&rty)))
+                            Expression::Atom(Atom::from_f64(lhs_val + rhs_val, lty.join(rty)))
                         }
                         Operator::Subtract => {
-                            Expression::Atom(Atom::from_f64(lhs_val - rhs_val, lty.join(&rty)))
+                            Expression::Atom(Atom::from_f64(lhs_val - rhs_val, lty.join(rty)))
                         }
                         Operator::Multiply => {
-                            Expression::Atom(Atom::from_f64(lhs_val * rhs_val, lty.join(&rty)))
+                            Expression::Atom(Atom::from_f64(lhs_val * rhs_val, lty.join(rty)))
                         }
                         Operator::Divide => {
-                            Expression::Atom(Atom::from_f64(lhs_val / rhs_val, lty.join(&rty)))
+                            Expression::Atom(Atom::from_f64(lhs_val / rhs_val, lty.join(rty)))
                         }
                         Operator::Modulo => {
-                            Expression::Atom(Atom::from_f64(lhs_val % rhs_val, lty.join(&rty)))
+                            Expression::Atom(Atom::from_f64(lhs_val % rhs_val, lty.join(rty)))
                         }
-
                         _ => Expression::BinaryOperation(
                             Box::new(Expression::Atom(lhs)),
                             op,
@@ -224,7 +223,7 @@ impl ConstantFolding {
             Expression::BinaryOperation(lhs, op, rhs) => {
                 let lhs = self.fold_expression(*lhs);
                 let rhs = self.fold_expression(*rhs);
-                match (lhs, op, rhs) {
+                match (lhs.clone(), op, rhs.clone()) {
                     (Expression::Atom(lhs_atom), op, Expression::Atom(rhs_atom)) => {
                         if let Some(lty) = lhs_atom.get_type() {
                             if let Some(rty) = rhs_atom.get_type() {
@@ -233,25 +232,13 @@ impl ConstantFolding {
                                 {
                                     self.fold_numeric_op(lhs_atom, op, rhs_atom)
                                 } else {
-                                    Expression::BinaryOperation(
-                                        Box::new(Expression::Atom(lhs_atom)),
-                                        op,
-                                        Box::new(Expression::Atom(rhs_atom)),
-                                    )
+                                    Expression::BinaryOperation(Box::new(lhs), op, Box::new(rhs))
                                 }
                             } else {
-                                Expression::BinaryOperation(
-                                    Box::new(Expression::Atom(lhs_atom)),
-                                    op,
-                                    Box::new(Expression::Atom(rhs_atom)),
-                                )
+                                Expression::BinaryOperation(Box::new(lhs), op, Box::new(rhs))
                             }
                         } else {
-                            Expression::BinaryOperation(
-                                Box::new(Expression::Atom(lhs_atom)),
-                                op,
-                                Box::new(Expression::Atom(rhs_atom)),
-                            )
+                            Expression::BinaryOperation(Box::new(lhs), op, Box::new(rhs))
                         }
                     }
                     (lhs, op, rhs) => Expression::BinaryOperation(Box::new(lhs), op, Box::new(rhs)),
@@ -282,7 +269,7 @@ impl ConstantFolding {
         Statement::Conditional(Conditional::new(
             processed_condition,
             Block::new(processed_then_block),
-            processed_else_block.map(|block| Block::new(block)),
+            processed_else_block.map(Block::new),
         ))
     }
 }

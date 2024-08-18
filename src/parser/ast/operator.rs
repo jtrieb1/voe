@@ -49,9 +49,7 @@ impl Operator {
             Operator::Not | Operator::Neg => None,
             _ => {
                 let (tyl, tyr) = (ctx_lhs.ty.clone()?, ctx_rhs.ty.clone()?);
-                if tyl.is_integral() && tyr.is_integral() {
-                    tyl.join(&tyr)
-                } else if tyl.is_decimal() && tyr.is_decimal() {
+                if tyl.is_integral() && tyr.is_integral() || tyl.is_decimal() && tyr.is_decimal() {
                     tyl.join(&tyr)
                 } else {
                     None

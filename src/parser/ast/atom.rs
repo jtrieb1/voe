@@ -110,7 +110,7 @@ pub fn parse_atom(pair: Pair<Rule>) -> Result<Atom, Error<Rule>> {
                 ))?,
             };
             ty = match inner.next() {
-                Some(t) => Type::from_str(t.as_str()),
+                Some(t) => Type::parse_type(t.as_str()),
                 None => None,
             };
             val

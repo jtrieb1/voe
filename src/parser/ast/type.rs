@@ -25,7 +25,7 @@ pub enum Type {
 }
 
 impl Type {
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse_type(s: &str) -> Option<Self> {
         match s {
             "u8" => Some(Type::U8),
             "u16" => Some(Type::U16),
@@ -156,7 +156,7 @@ pub fn parse_type(pair: Pair<Rule>) -> Result<Type, Error<Rule>> {
         }
         Rule::primitive_type => {
             let s = pair.as_str();
-            Type::from_str(s).ok_or(Error::new_from_span(
+            Type::parse_type(s).ok_or(Error::new_from_span(
                 pest::error::ErrorVariant::CustomError {
                     message: format!("unknown type: {}", s),
                 },
