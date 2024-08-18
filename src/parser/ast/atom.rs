@@ -44,8 +44,8 @@ impl std::fmt::Display for Atom {
             "{}{}{}",
             if self.negative { "-" } else { "" },
             match &self.value {
-                AtomValue::Integer(i) => i.to_string(),
-                AtomValue::Float(f) => f.to_string(),
+                AtomValue::Integer(i) => i.abs().to_string(),
+                AtomValue::Float(f) => f.abs().to_string(),
                 AtomValue::String(s) => s.to_string(),
                 AtomValue::Boolean(b) => b.to_string(),
                 AtomValue::Identity(i) => i.to_string(),

@@ -4,5 +4,5 @@ function main() -> () {
     let c: i8 = a * b;
     let d: bool = c > a;
     let e: i8 = (a + 3i8) * (1i8 - c);
-    let f: i16 = 4i16;
+    let f: i32 = -4i32;
 }
