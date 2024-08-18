@@ -13,6 +13,10 @@ impl Block {
     pub fn new(statements: Vec<Statement>) -> Block {
         Block { statements }
     }
+
+    pub fn statements(&self) -> &Vec<Statement> {
+        &self.statements
+    }
 }
 
 impl std::fmt::Display for Block {

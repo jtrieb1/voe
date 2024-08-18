@@ -56,11 +56,12 @@ pub fn parse_expression(pair: Pair<Rule>) -> Result<Expression, Error<Rule>> {
                 let expr = t?;
                 match expr {
                     Expression::Atom(atom) => {
-                        Ok(Expression::Atom(Atom::new(!atom.negative, atom.value)))
+                        Ok(Expression::Atom(Atom::new(!atom.negative, atom.value, atom.ty)))
                     }
                     Expression::BinaryOperation(..) => Ok(Expression::Atom(Atom::new(
                         true,
                         AtomValue::ParExpr(Box::new(expr)),
+                        None
                     ))),
                 }
             }

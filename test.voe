@@ -1,7 +1,8 @@
 fn main() -> () {
-    let a: i8 = 1i8;
+    let a: i8 = 1i8 + 1i8;
     let b = 1i8;
     let c: i8 = a * b;
     let d: bool = c > a;
     let e: i8 = (a + 3i8) * (1i8 - c);
+    let f = 3i16 + 1i8;
 }

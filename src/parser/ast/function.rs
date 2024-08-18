@@ -2,10 +2,10 @@ use super::{Block, Type, VariableDeclaration};
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct FunctionDefinition {
-    name: String,
-    inputs: Vec<VariableDeclaration>,
-    return_type: Type,
-    body: Block,
+    pub name: String,
+    pub inputs: Vec<VariableDeclaration>,
+    pub return_type: Type,
+    pub body: Block,
 }
 
 impl FunctionDefinition {
@@ -21,6 +21,22 @@ impl FunctionDefinition {
             return_type,
             body,
         }
+    }
+
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+
+    pub fn inputs(&self) -> &Vec<VariableDeclaration> {
+        &self.inputs
+    }
+
+    pub fn return_type(&self) -> &Type {
+        &self.return_type
+    }
+
+    pub fn body(&self) -> &Block {
+        &self.body
     }
 }
 

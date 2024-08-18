@@ -2,9 +2,9 @@ use super::{Expression, Type};
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct VariableDeclaration {
-    name: String,
-    var_type: Option<Type>,
-    value: Option<Expression>,
+    pub name: String,
+    pub var_type: Option<Type>,
+    pub value: Option<Expression>,
 }
 
 impl VariableDeclaration {

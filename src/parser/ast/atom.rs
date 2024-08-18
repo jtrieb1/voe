@@ -12,11 +12,28 @@ pub struct Atom {
 }
 
 impl Atom {
-    pub fn new(negative: bool, value: AtomValue) -> Atom {
-        Atom { negative, value, ty: None }
+    pub fn new(negative: bool, value: AtomValue, ty: Option<Type>) -> Atom {
+        Atom { negative, value, ty }
+    }
+    pub fn get_type(&self) -> Option<Type> {
+        self.ty.clone()
     }
     pub fn set_type(&mut self, ty: Type) {
         self.ty = Some(ty);
+    }
+    pub fn from_i28(i: i128, ty: Option<Type>) -> Atom {
+        Atom {
+            negative: i < 0,
+            value: AtomValue::Integer(i),
+            ty,
+        }
+    }
+    pub fn from_f64(f: f64, ty: Option<Type>) -> Atom {
+        Atom {
+            negative: f < 0.0,
+            value: AtomValue::Float(f),
+            ty,
+        }
     }
 }
 

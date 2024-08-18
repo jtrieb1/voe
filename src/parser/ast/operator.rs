@@ -1,3 +1,5 @@
+use super::{atom::Atom, Type};
+
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum Operator {
     Add,
@@ -21,19 +23,28 @@ pub enum Operator {
 }
 
 impl Operator {
-    pub fn precedence(&self) -> u8 {
+    pub fn return_type(&self, ctx_rhs: &Atom, ctx_lhs: &Atom) -> Option<Type> {
         match self {
-            Operator::Or | Operator::LogicalOr => 1,
-            Operator::And | Operator::LogicalAnd => 2,
             Operator::Equal
             | Operator::NotEqual
             | Operator::LessThan
             | Operator::LessThanOrEqual
             | Operator::GreaterThan
-            | Operator::GreaterThanOrEqual => 3,
-            Operator::Add | Operator::Subtract => 4,
-            Operator::Multiply | Operator::Divide | Operator::Modulo | Operator::Pow => 5,
-            Operator::Not | Operator::Neg => 6,
+            | Operator::GreaterThanOrEqual => Some(Type::Bool),
+            Operator::And | Operator::Or | Operator::LogicalAnd | Operator::LogicalOr => {
+                Some(Type::Bool)
+            }
+            Operator::Not | Operator::Neg => None,
+            _ => {
+                let (tyl, tyr) = (ctx_lhs.ty.clone()?, ctx_rhs.ty.clone()?);
+                if tyl.is_integral() && tyr.is_integral() {
+                    tyl.join(&tyr)
+                } else if tyl.is_decimal() && tyr.is_decimal() {
+                    tyl.join(&tyr)
+                } else {
+                    None
+                }
+            }
         }
     }
 }

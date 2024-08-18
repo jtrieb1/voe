@@ -43,6 +43,77 @@ impl Type {
             _ => None,
         }
     }
+
+    pub fn is_integral(&self) -> bool {
+        matches!(self, Type::U8 | Type::U16 | Type::U32 | Type::U64 | Type::I8 | Type::I16 | Type::I32 | Type::I64)
+    }
+
+    pub fn is_decimal(&self) -> bool {
+        matches!(self, Type::F32 | Type::F64)
+    }
+
+    pub fn is_signed(&self) -> bool {
+        matches!(self, Type::I8 | Type::I16 | Type::I32 | Type::I64)
+    }
+
+    fn join_integral(&self, other: &Type) -> Option<Type> {
+        if self.is_signed() != other.is_signed() {
+            return None;
+        }
+
+        match (self, other) {
+            // Unsigned pairings, take larger type as result
+            (Type::U8, rhs) => Some(rhs.clone()),
+
+            (Type::U16, Type::U8) => Some(Type::U16),
+            (Type::U16, rhs) => Some(rhs.clone()),
+
+            (Type::U32, Type::U8) => Some(Type::U32),
+            (Type::U32, Type::U16) => Some(Type::U32),
+            (Type::U32, rhs) => Some(rhs.clone()),
+
+            (Type::U64, Type::U8) => Some(Type::U64),
+            (Type::U64, Type::U16) => Some(Type::U64),
+            (Type::U64, Type::U32) => Some(Type::U64),
+            (Type::U64, rhs) => Some(rhs.clone()),
+
+
+            // Signed pairings, take larger type as result
+            (Type::I8, rhs) => Some(rhs.clone()),
+
+            (Type::I16, Type::I8) => Some(Type::I16),
+            (Type::I16, rhs) => Some(rhs.clone()),
+
+            (Type::I32, Type::I8) => Some(Type::I32),
+            (Type::I32, Type::I16) => Some(Type::I32),
+            (Type::I32, rhs) => Some(rhs.clone()),
+
+            (Type::I64, Type::I8) => Some(Type::I64),
+            (Type::I64, Type::I16) => Some(Type::I64),
+            (Type::I64, Type::I32) => Some(Type::I64),
+            (Type::I64, rhs) => Some(rhs.clone()),
+
+            _ => None,
+        }
+    }
+
+    fn join_decimal(&self, other: &Type) -> Option<Type> {
+        match (self, other) {
+            (Type::F32, rhs) => Some(rhs.clone()),
+            (Type::F64, rhs) => Some(rhs.clone()),
+            _ => None,
+        }
+    }
+
+    pub fn join(&self, other: &Type) -> Option<Type> {
+        if self.is_integral() && other.is_integral() {
+            self.join_integral(other)
+        } else if self.is_decimal() && other.is_decimal() {
+            self.join_decimal(other)
+        } else {
+            None
+        }
+    }
 }
 
 impl std::fmt::Display for Type {
