@@ -19,19 +19,23 @@ impl Atom {
             ty,
         }
     }
+
     pub fn get_type(&self) -> Option<Type> {
         self.ty.clone()
     }
+
     pub fn set_type(&mut self, ty: Type) {
         self.ty = Some(ty);
     }
-    pub fn from_i28(i: i128, ty: Option<Type>) -> Atom {
+
+    pub fn from_i128(i: i128, ty: Option<Type>) -> Atom {
         Atom {
             negative: i < 0,
             value: AtomValue::Integer(i),
             ty,
         }
     }
+
     pub fn from_f64(f: f64, ty: Option<Type>) -> Atom {
         Atom {
             negative: f < 0.0,
@@ -94,6 +98,7 @@ pub fn parse_atom(pair: Pair<Rule>) -> Result<Atom, Error<Rule>> {
     if negative {
         next = pair.next().unwrap();
     }
+
     let mut ty = None;
     let value = match next.as_rule() {
         Rule::numeric => {
@@ -109,10 +114,7 @@ pub fn parse_atom(pair: Pair<Rule>) -> Result<Atom, Error<Rule>> {
                     next.as_span(),
                 ))?,
             };
-            ty = match inner.next() {
-                Some(t) => Type::parse_type(t.as_str()),
-                None => None,
-            };
+            ty = inner.next().map(|t| Type::parse_type(t.as_str()));
             val
         }
         Rule::string => AtomValue::String(next.as_str().to_string()),
@@ -126,9 +128,10 @@ pub fn parse_atom(pair: Pair<Rule>) -> Result<Atom, Error<Rule>> {
             next.as_span(),
         ))?,
     };
+
     Ok(Atom {
         negative,
         value,
-        ty,
+        ty: ty.flatten(),
     })
 }

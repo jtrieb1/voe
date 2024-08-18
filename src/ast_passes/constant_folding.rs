@@ -54,7 +54,7 @@ impl ConstantFolding {
                     return Statement::VariableDeclaration(VariableDeclaration::new(
                         name,
                         ty.clone(),
-                        Some(Expression::Atom(Atom::from_i28(value, ty))),
+                        Some(Expression::Atom(Atom::from_i128(value, ty))),
                     ));
                 } else if let AtomValue::Float(value) = atom.value {
                     return Statement::VariableDeclaration(VariableDeclaration::new(
@@ -103,19 +103,19 @@ impl ConstantFolding {
 
                     match op {
                         Operator::Add => {
-                            Expression::Atom(Atom::from_i28(lhs_val + rhs_val, lty.join(rty)))
+                            Expression::Atom(Atom::from_i128(lhs_val + rhs_val, lty.join(rty)))
                         }
                         Operator::Subtract => {
-                            Expression::Atom(Atom::from_i28(lhs_val - rhs_val, lty.join(rty)))
+                            Expression::Atom(Atom::from_i128(lhs_val - rhs_val, lty.join(rty)))
                         }
                         Operator::Multiply => {
-                            Expression::Atom(Atom::from_i28(lhs_val * rhs_val, lty.join(rty)))
+                            Expression::Atom(Atom::from_i128(lhs_val * rhs_val, lty.join(rty)))
                         }
                         Operator::Divide => {
-                            Expression::Atom(Atom::from_i28(lhs_val / rhs_val, lty.join(rty)))
+                            Expression::Atom(Atom::from_i128(lhs_val / rhs_val, lty.join(rty)))
                         }
                         Operator::Modulo => {
-                            Expression::Atom(Atom::from_i28(lhs_val % rhs_val, lty.join(rty)))
+                            Expression::Atom(Atom::from_i128(lhs_val % rhs_val, lty.join(rty)))
                         }
                         _ => Expression::BinaryOperation(
                             Box::new(Expression::Atom(lhs)),
