@@ -1,0 +1,78 @@
+WHITESPACE = _{ " " | "\t" | "\n" | "\r" }
+COMMENT = _{ "//" ~ (!"\n" ~ ANY)* }
+
+program = { SOI ~ statement* ~ EOI }
+
+keyword = { let | fn | if | else | while | return | break | continue | new | class | interface | enum | impl | type_kw | module | import | export | use | as | from | in | asq | is }
+    let = { "let" }
+    fn = { "fn" }
+    if = { "if" }
+    else = { "else" }
+    while = { "while" }
+    return = { "return" }
+    break = { "break" }
+    continue = { "continue" }
+    new = { "new" }
+    class = { "class" }
+    interface = { "interface" }
+    enum = { "enum" }
+    impl = { "impl" }
+    type_kw = { "type" }
+    module = { "module" }
+    import = { "import" }
+    export = { "export" }
+    use = { "use" }
+    as = { "as" }
+    from = { "from" }
+    in = { "in" }
+    asq = { "as?" }
+    is = { "is" }
+
+bool = @{ "true" | "false" }
+string = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+integer = @{ ASCII_DIGIT+ }
+decimal = @{ integer ~ "." ~ integer? }
+numeric = { (integer | decimal) ~ value_type? }
+ident = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
+atom = {unary_minus? ~ atom_value}
+atom_value = _{numeric | string | ident | "(" ~ expression ~ ")"}
+
+operator = _{add | sub | mul | div | mod | pow | logical_and | bitwise_and | logical_or | bitwise_or | eq | ne | gt | lt | ge | le | not}
+    unary_minus = { "-" }
+    add = { "+" }
+    sub = { "-" }
+    mul = { "*" }
+    div = { "/" }
+    mod = { "%" }
+    pow = { "^" }
+    logical_and = { "&&" }
+    bitwise_and = { "&" }
+    logical_or = { "||" }
+    bitwise_or = { "|" }
+    eq = { "==" }
+    ne = { "!=" }
+    gt = { ">" }
+    lt = { "<" }
+    ge = { ">=" }
+    le = { "<=" }
+    not = { "!" }
+
+value_type = { "u8" | "i8" | "u16" | "i16" | "u32" | "i32" | "u64" | "i64" | "u128" | "i128" | "f32" | "f64" | "bool" | "char" } // specifically types that a number can be cast to
+primitive_type = { value_type | "void" | "()" }
+type = _{ primitive_type | gtype| dtype | ident }
+gtype = { ident ~ ("<" ~ type ~ ("," ~ type)* ~ ">")? }
+dtype = { "forall" ~ param_list ~ "." ~ type }
+
+expression = {atom ~ (operator ~ atom)*}
+assignment = {ident ~ "=" ~ (expression | conditional)}
+
+conditional = {"if" ~ expression ~ block ~ ("else" ~ block)?}
+block = {"{" ~ statement* ~ "}"}
+statement = {(expression ~ ";") | variable_declaration | function_declaration | conditional}
+variable_declaration = {"let" ~ ident ~ (":" ~ type)? ~ ("=" ~ expression)? ~ ";"}
+function_declaration = {"fn" ~ ident ~ "(" ~ param_list ~ ")" ~ "->" ~ type ~ block}
+dfunction_declaration = {"forall" ~ ident ~ ":" ~ type ~ "." ~ function_declaration}
+param_list = {(ident ~ ":" ~ type ~ ("," ~ ident ~ ":" ~ type)*)?}
+match_expr = {"match" ~ expression ~ "{" ~ match_case* ~ "}"}
+match_case = {pattern ~ "=>" ~ (block | expression) ~ ","}
+pattern = {ident | "_" | "(" ~ pattern ~ ")" }  
