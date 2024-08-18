@@ -10,7 +10,7 @@ use super::ASTPass;
 pub struct ConstantFolding;
 
 impl ConstantFolding {
-    pub fn fold_statement(&self, statement: Statement) -> Statement {
+    fn fold_statement(&self, statement: Statement) -> Statement {
         match statement {
             Statement::Function(fd) => self.fold_function_definition(fd),
             Statement::VariableDeclaration(vd) => self.fold_variable_declaration(vd),
@@ -19,7 +19,7 @@ impl ConstantFolding {
         }
     }
 
-    pub fn fold_function_definition(&self, fd: FunctionDefinition) -> Statement {
+    fn fold_function_definition(&self, fd: FunctionDefinition) -> Statement {
         let FunctionDefinition {
             name,
             inputs,
@@ -39,7 +39,7 @@ impl ConstantFolding {
         ))
     }
 
-    pub fn fold_variable_declaration(&self, vd: VariableDeclaration) -> Statement {
+    fn fold_variable_declaration(&self, vd: VariableDeclaration) -> Statement {
         let VariableDeclaration {
             name,
             var_type,
@@ -68,7 +68,7 @@ impl ConstantFolding {
         Statement::VariableDeclaration(VariableDeclaration::new(name, ty, processed_value))
     }
 
-    pub fn fold_numeric_op(&self, lhs: Atom, op: Operator, rhs: Atom) -> Expression {
+    fn fold_numeric_op(&self, lhs: Atom, op: Operator, rhs: Atom) -> Expression {
         if let Some(lty) = &lhs.ty {
             if let Some(rty) = &rhs.ty {
                 if lty.is_integral() && rty.is_integral() {
@@ -199,7 +199,7 @@ impl ConstantFolding {
         }
     }
 
-    pub fn fold_expression(&self, expr: Expression) -> Expression {
+    fn fold_expression(&self, expr: Expression) -> Expression {
         match expr {
             Expression::Atom(atom) => {
                 let Atom {
@@ -247,7 +247,7 @@ impl ConstantFolding {
         }
     }
 
-    pub fn fold_conditional(&self, cond: Conditional) -> Statement {
+    fn fold_conditional(&self, cond: Conditional) -> Statement {
         let Conditional {
             condition,
             then_block,
