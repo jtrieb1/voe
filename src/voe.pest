@@ -31,11 +31,11 @@ keyword = { let | fn | if | else | while | return | break | continue | new | cla
 bool = @{ "true" | "false" }
 string = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 integer = @{ ASCII_DIGIT+ }
-decimal = @{ integer ~ "." ~ integer? }
-numeric = { (integer | decimal) ~ value_type? }
+decimal = @{ integer ~ "." ~ integer }
+numeric = { (decimal | integer) ~ value_type? }
 ident = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 atom = {unary_minus? ~ atom_value}
-atom_value = _{numeric | string | ident | "(" ~ expression ~ ")"}
+atom_value = _{numeric | bool | string | ident | "(" ~ expression ~ ")"}
 
 operator = _{add | sub | mul | div | mod | pow | logical_and | bitwise_and | logical_or | bitwise_or | eq | ne | gt | lt | ge | le | not}
     unary_minus = { "-" }

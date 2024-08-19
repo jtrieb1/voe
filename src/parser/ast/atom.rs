@@ -114,13 +114,25 @@ pub fn parse_atom(pair: Pair<Rule>) -> Result<Atom, Error<Rule>> {
                     next.as_span(),
                 ))?,
             };
-            ty = inner.next().map(|t| Type::parse_type(t.as_str()));
+            ty = inner.next().map(|t| Type::parse_type(t.as_str())).flatten();
             val
         }
-        Rule::string => AtomValue::String(next.as_str().to_string()),
-        Rule::bool => AtomValue::Boolean(next.as_str() == "true"),
+        Rule::string => {
+            let s = next.as_str();
+            let val = AtomValue::String(s[1..s.len() - 1].to_string()); // Remove quotes
+            ty = Some(Type::String);
+            val
+        },
+        Rule::bool => {
+            ty = Some(Type::Bool);
+            AtomValue::Boolean(next.as_str() == "true")
+        }
         Rule::ident => AtomValue::Identity(next.as_str().to_string()),
-        Rule::expression => AtomValue::ParExpr(Box::new(parse_expression(next)?)),
+        Rule::expression => {
+            let expr = parse_expression(next)?;
+            ty = expr.return_type();
+            AtomValue::ParExpr(Box::new(expr))
+        },
         _ => Err(Error::new_from_span(
             pest::error::ErrorVariant::CustomError {
                 message: "expected atom".to_string(),
@@ -132,6 +144,101 @@ pub fn parse_atom(pair: Pair<Rule>) -> Result<Atom, Error<Rule>> {
     Ok(Atom {
         negative,
         value,
-        ty: ty.flatten(),
+        ty,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use pest::Parser;
+
+    use super::*;
+    use crate::VoeParser;
+
+    #[test]
+    fn test_parse_atom() {
+        let input = "123i32";
+        let mut pair = VoeParser::parse(Rule::atom, input).expect("No atom recognized");
+        let atom = parse_atom(pair.next().unwrap()).unwrap();
+        assert_eq!(
+            atom,
+            Atom {
+                negative: false,
+                value: AtomValue::Integer(123),
+                ty: Some(Type::I32)
+            }
+        );
+
+        let input = "-123i32";
+        let mut pair = VoeParser::parse(Rule::atom, input).expect("No atom recognized");
+        let atom = parse_atom(pair.next().unwrap()).unwrap();
+        assert_eq!(
+            atom,
+            Atom {
+                negative: true,
+                value: AtomValue::Integer(123),
+                ty: Some(Type::I32)
+            }
+        );
+
+        let input = "123.456f32";
+        let mut pair = VoeParser::parse(Rule::atom, input).expect("No atom recognized");
+        let atom = parse_atom(pair.next().unwrap()).unwrap();
+        assert_eq!(
+            atom,
+            Atom {
+                negative: false,
+                value: AtomValue::Float(123.456),
+                ty: Some(Type::F32)
+            }
+        );
+
+        let input = "-123.456f64";
+        let mut pair = VoeParser::parse(Rule::atom, input).expect("No atom recognized");
+        let atom = parse_atom(pair.next().unwrap()).unwrap();
+        assert_eq!(
+            atom,
+            Atom {
+                negative: true,
+                value: AtomValue::Float(123.456),
+                ty: Some(Type::F64)
+            }
+        );
+
+        let input = "\"hello\"";
+        let mut pair = VoeParser::parse(Rule::atom, input).expect("No atom recognized");
+        let atom = parse_atom(pair.next().unwrap()).unwrap();
+        assert_eq!(
+            atom,
+            Atom {
+                negative: false,
+                value: AtomValue::String("hello".to_string()),
+                ty: Some(Type::String)
+            }
+        );
+
+        let input = "true";
+        let mut pair = VoeParser::parse(Rule::atom, input).expect("No atom recognized");
+        let atom = parse_atom(pair.next().unwrap()).unwrap();
+        assert_eq!(
+            atom,
+            Atom {
+                negative: false,
+                value: AtomValue::Boolean(true),
+                ty: Some(Type::Bool)
+            }
+        );
+
+        let input = "false";
+        let mut pair = VoeParser::parse(Rule::atom, input).expect("No atom recognized");
+        let atom = parse_atom(pair.next().unwrap()).unwrap();
+        assert_eq!(
+            atom,
+            Atom {
+                negative: false,
+                value: AtomValue::Boolean(false),
+                ty: Some(Type::Bool)
+            }
+        );
+    }
 }
