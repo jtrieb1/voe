@@ -5,4 +5,6 @@ fn main() -> () {
     let d = c > a;
     let e: i8 = (a + 3i8) * (1i8 - c);
     let f = 3i16 + 1i8 - 8i32;
+    let g = 1i8 + 3i16 * 5i32;
+    let h = (2i8 + 4i32) * (20i8 / 4i16 + 3i8);
 }

@@ -68,6 +68,25 @@ impl ConstantFolding {
         Statement::VariableDeclaration(VariableDeclaration::new(name, ty, processed_value))
     }
 
+    fn fold_atom(&self, atom: Atom) -> Atom {
+        let Atom {
+            negative,
+            value,
+            ty,
+        } = atom;
+        match value {
+            AtomValue::ParExpr(einner) => {
+                let eproc = self.fold_expression(*einner);
+                if let Expression::Atom(a) = eproc {
+                    Atom::new(negative ^ a.negative, a.value, ty)
+                } else {
+                    Atom::new(negative, AtomValue::ParExpr(Box::new(eproc)), ty)
+                }
+            }
+            _ => Atom::new(negative, value, ty),
+        }
+    }
+
     fn fold_numeric_op(&self, lhs: Atom, op: Operator, rhs: Atom) -> Expression {
         if let Some(lty) = &lhs.ty {
             if let Some(rty) = &rhs.ty {
@@ -76,30 +95,46 @@ impl ConstantFolding {
                         negative: lhs_neg,
                         value: lhs_val,
                         ty: _,
-                    } = &lhs;
+                    } = self.fold_atom(lhs.clone());
                     let Atom {
                         negative: rhs_neg,
                         value: rhs_val,
                         ty: _,
-                    } = &rhs;
+                    } = self.fold_atom(rhs.clone());
 
                     let AtomValue::Integer(lhs_val) = lhs_val else {
                         return Expression::BinaryOperation(
-                            Box::new(Expression::Atom(lhs)),
+                            Box::new(Expression::Atom(Atom::new(
+                                lhs_neg,
+                                lhs_val,
+                                Some(lty.clone()),
+                            ))),
                             op,
-                            Box::new(Expression::Atom(rhs)),
+                            Box::new(Expression::Atom(Atom::new(
+                                rhs_neg,
+                                rhs_val,
+                                Some(rty.clone()),
+                            ))),
                         );
                     };
                     let AtomValue::Integer(rhs_val) = rhs_val else {
                         return Expression::BinaryOperation(
-                            Box::new(Expression::Atom(lhs)),
+                            Box::new(Expression::Atom(Atom::new(
+                                lhs_neg,
+                                AtomValue::Integer(lhs_val),
+                                Some(lty.clone()),
+                            ))),
                             op,
-                            Box::new(Expression::Atom(rhs)),
+                            Box::new(Expression::Atom(Atom::new(
+                                rhs_neg,
+                                rhs_val,
+                                Some(rty.clone()),
+                            ))),
                         );
                     };
 
-                    let lhs_val = if *lhs_neg { -lhs_val } else { *lhs_val };
-                    let rhs_val = if *rhs_neg { -rhs_val } else { *rhs_val };
+                    let lhs_val = if lhs_neg { -lhs_val } else { lhs_val };
+                    let rhs_val = if rhs_neg { -rhs_val } else { rhs_val };
 
                     match op {
                         Operator::Add => {
@@ -118,9 +153,17 @@ impl ConstantFolding {
                             Expression::Atom(Atom::from_i128(lhs_val % rhs_val, lty.join(rty)))
                         }
                         _ => Expression::BinaryOperation(
-                            Box::new(Expression::Atom(lhs)),
+                            Box::new(Expression::Atom(Atom::new(
+                                lhs_neg,
+                                AtomValue::Integer(lhs_val),
+                                Some(lty.clone()),
+                            ))),
                             op,
-                            Box::new(Expression::Atom(rhs)),
+                            Box::new(Expression::Atom(Atom::new(
+                                rhs_neg,
+                                AtomValue::Integer(rhs_val),
+                                Some(rty.clone()),
+                            ))),
                         ),
                     }
                 } else if lty.is_decimal() && rty.is_decimal() {

@@ -59,7 +59,7 @@ impl std::fmt::Display for Atom {
                 AtomValue::Identity(i) => i.to_string(),
                 AtomValue::ParExpr(e) => format!("({})", e),
             },
-            if self.ty.is_some() {
+            if self.ty.is_some() && self.value.is_simple() {
                 format!("{}", self.ty.as_ref().unwrap())
             } else {
                 "".to_string()
@@ -76,6 +76,15 @@ pub enum AtomValue {
     Boolean(bool),
     Identity(String),
     ParExpr(Box<Expression>),
+}
+
+impl AtomValue {
+    pub fn is_simple(&self) -> bool {
+        matches!(
+            self,
+            AtomValue::Integer(_) | AtomValue::Float(_)
+        )
+    }
 }
 
 fn parse_integer(pair: Pair<Rule>) -> Result<AtomValue, Error<Rule>> {
@@ -131,6 +140,9 @@ pub fn parse_atom(pair: Pair<Rule>) -> Result<Atom, Error<Rule>> {
         Rule::expression => {
             let expr = parse_expression(next)?;
             ty = expr.return_type();
+            if let Expression::Atom(atom) = expr {
+                return Ok(atom);
+            }
             AtomValue::ParExpr(Box::new(expr))
         },
         _ => Err(Error::new_from_span(
